@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 
 const API_KEY = process.env.HUGGING_FACE_AI_API_KEY;
+
 type dataType = {
 	messages: {
 		role: string;
@@ -28,17 +29,35 @@ async function huggingFaceApi(data: dataType) {
 	return result.choices[0].message.content;
 }
 
-type propsType = {
-	params: {
-		context: string;
-		params: string;
-		jsonLen: string;
-	};
-};
-
-export async function GET(req: NextRequest, { params }: propsType) {
+export async function GET(req: NextRequest) {
 	let AIerror = true;
-	const { context, params: paramsValue, jsonLen } = await params;
+	const invalidMsg = {
+		invalidInput: {
+			status:400,
+			message: 'Invalid input. Please use the following search parameters.',
+			details: {
+				context: 'The context or main section of the JSON.',
+				params: 'elements element must include.',
+				optitional:{
+					jsonlen: 'Number of elements the json will return',
+				}
+			},
+		},
+	};
+	const { searchParams } = new URL(req.url);
+	const { context, params, jsonlen } = {
+		context: searchParams.get('context'),
+		params: searchParams.get('params'),
+		jsonlen: searchParams.get('jsonlen')||"As you like",
+	};
+	if (context === null || params === null)
+		return new Response(JSON.stringify(invalidMsg, null, 4), {
+			status: 400,
+			headers: {
+				'Content-Type': 'application/json',
+			},
+		});
+
 	const data = {
 		messages: [
 			{
@@ -50,7 +69,7 @@ export async function GET(req: NextRequest, { params }: propsType) {
 			},
 			{
 				role: 'user',
-				content: `assunto: ${context}; parametros esperados: ${paramsValue}; tamanho: ${jsonLen}`,
+				content: `assunto: ${context}; parametros esperados: ${params}; tamanho: ${jsonlen}`,
 			},
 		],
 		top_p: 1,
@@ -61,7 +80,7 @@ export async function GET(req: NextRequest, { params }: propsType) {
 		try {
 			console.log(JSON.parse(result));
 			result = JSON.parse(result);
-			result = JSON.stringify(result,null,4);
+			result = JSON.stringify(result, null, 4);
 			// result = JSON.parse(result);
 			AIerror = false;
 
@@ -74,7 +93,7 @@ export async function GET(req: NextRequest, { params }: propsType) {
 				},
 			});
 		} catch (error) {
-			console.log('!!!! Got an AI error: \n' + error+"\n\n\n\n\n"+result);
+			console.log('!!!! Got an AI error: \n' + error + '\n\n\n\n\n' + result);
 			continue;
 		}
 	}
