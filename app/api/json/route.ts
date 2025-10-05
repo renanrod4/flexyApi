@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
 	const { context, params, jsonlen } = {
 		context: searchParams.get('context'),
 		params: searchParams.get('params'),
-		jsonlen: searchParams.get('jsonlen')||"As you like",
+		jsonlen: searchParams.get('jsonlen'),
 	};
 	if (context === null || params === null)
 		return new Response(JSON.stringify(invalidMsg, null, 4), {
@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
 			},
 			{
 				role: 'user',
-				content: `assunto: ${context}; parametros esperados: ${params}; tamanho: ${jsonlen}`,
+				content: `contexto(esse vai ser o array principal): ${context}; parametros esperados: ${params}; ${jsonlen?"tamanho: "+jsonlen:"use a quantidade de elementos que quiser"}`,
 			},
 		],
 		top_p: 1,
