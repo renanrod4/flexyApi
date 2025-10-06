@@ -25,22 +25,29 @@ async function huggingFaceApi(data: dataType) {
 	});
 
 	const result = await response.json();
-
-	return result.choices[0].message.content;
+	if (result.choices && result.choices[0]?.message?.content) {
+		return result.choices[0].message.content;
+	} else {
+		console.error('Unexpected API response format:', result);
+		return JSON.stringify({
+			error: 'Unexpected API response format',
+			details: result,
+		});
+	}
 }
 
 export async function GET(req: NextRequest) {
 	let AIerror = true;
 	const invalidMsg = {
 		invalidInput: {
-			status:400,
+			status: 400,
 			message: 'Invalid input. Please use the following search parameters.',
 			details: {
 				context: 'The context or main section of the JSON.',
-				params: 'elements element must include.',
-				optitional:{
+				params: 'parameters that element must include. MUST BE SEPARATED BY +, if some parameter needs to be a object use {id:value} in front of it being the "value" the ',
+				optitional: {
 					jsonlen: 'Number of elements the json will return',
-				}
+				},
 			},
 		},
 	};
@@ -64,22 +71,60 @@ export async function GET(req: NextRequest) {
 				role: 'system',
 				content: `
 				Você é uma API. Gere um JSON com base no conteúdo fornecido pelo usuário. 
-				Não inclua nenhum texto explicativo, cabeçalhos, comentários ou formatação fora do JSON, como markdown por exemplo.
+
+				Não inclua nenhum texto explicativo, cabeçalhos, comentários ou formatação fora do JSON, como markdown por exemplo;
+				voce recebera:
+				contexto: 
+					geralmente uma string simples, o valor deste contexto vai ser a key do array dos itens do JSON
+
+				parametros[]: 
+					Obrigatoriamente separados por + 
+					opcionalmente ele pode querer que um desses parametros seja um array, 
+					neste caso você vai retornar um array de strings com o tamanho que voce preferir para este parametro, 
+					um possivel exemplo:
+					´´´
+						param1:int+param2[subvaloresDeParam:str]+param3+param4[outrosSubvaloresDesteParam]
+						
+						seu output:
+						{
+							"param1": "...",
+							"param2": [
+								"lorem",
+								"ipsum"
+								...
+							],
+							"param3": "...",
+							"param4": [
+								"calabreza",
+								"queijo",
+								"portuguesa",
+							],
+						},
+					´´´
+					os parametros podem opcionalmente ter tipagens definidas, por exemplo: param1:int
+
+				tamanho desejado de indices que json vai ter INT:
+					caso ele não passar você pode colocar a quantidade de elementos que quiser
+
 				`,
 			},
 			{
 				role: 'user',
-				content: `contexto(esse vai ser o array principal): ${context}; parametros esperados: ${params}; ${jsonlen?"tamanho: "+jsonlen:"use a quantidade de elementos que quiser"}`,
+				content: `
+					contexto(esse vai ser o array principal): ${context}; 
+					parametros esperados(keys que o array principal deve ter): ${params}; 
+					${jsonlen ? 'tamanho: ' + jsonlen : ''}`,
 			},
 		],
 		top_p: 1,
 		model: 'openai/gpt-oss-120b:fireworks-ai',
 	};
 	while (AIerror) {
-		let result = (await huggingFaceApi(data)) || 'Não foi possivel renderizar um json';
+		let result = (await huggingFaceApi(data)) || 'An unexpected error occurred, please try again later!';
 		try {
-			console.log(JSON.parse(result));
 			result = JSON.parse(result);
+			if (result?.error == "Unexpected API response format")throw new Error(result)
+			console.log(result);
 			result = JSON.stringify(result, null, 4);
 			// result = JSON.parse(result);
 			AIerror = false;
@@ -94,7 +139,6 @@ export async function GET(req: NextRequest) {
 			});
 		} catch (error) {
 			console.log('!!!! Got an AI error: \n' + error + '\n\n\n\n\n' + result);
-			continue;
 		}
 	}
 }
