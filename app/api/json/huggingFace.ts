@@ -1,14 +1,13 @@
-import { providers } from "./jsons";
+import { dataType, providers, providerType } from "./jsons";
 import { curProvider } from "./verifyResult";
 
 
-export default async function huggingFaceApi(data: dataType):Promise<string> {
-    const API_KEY = process.env.HUGGING_FACE_AI_API_KEY;
+export default async function huggingFaceApi(data: dataType,provider:providerType):Promise<string> {
 
-    const response = await fetch(`https://router.huggingface.co/v1/chat/completions`, {
+    const response = await fetch(`${provider.baseUrl}`, {
         method: 'POST',
         headers: {
-            Authorization: `Bearer ${API_KEY}`,
+            Authorization: `Bearer ${provider.apiKey}`,
             'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -29,12 +28,3 @@ export default async function huggingFaceApi(data: dataType):Promise<string> {
         return '';
     }
 }
-
-type dataType = {
-	messages: {
-		role: string;
-		content: string;
-	}[];
-	top_p?: number; // 1 no seu exemplo
-	model?: string;
-};

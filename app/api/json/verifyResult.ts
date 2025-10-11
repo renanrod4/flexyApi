@@ -1,3 +1,4 @@
+import filterResult from "./filterResult";
 import { getPrompt, providers } from "./jsons";
 export let curProvider = 0;
 
@@ -12,7 +13,7 @@ export async function verifyResult(context: string, params: string, jsonlen: str
 
 			console.log(`${providers[curProvider].name || curProvider}:`);
 			
-			res = (await providers[curProvider].callApi(data)) || '';
+			res = (await providers[curProvider].callApi(data,providers[curProvider])) || '';
 
 			console.log(` - (${res})`)//response for current test api
 
@@ -21,6 +22,10 @@ export async function verifyResult(context: string, params: string, jsonlen: str
 		} catch {console.log("ERRO NO PROVEDOR: "+providers[curProvider].name)}
 		curProvider += 1;
 	}
+	if (res){
+		res = filterResult(res);
+		return res;
+	}
 
-	return res ? res : callError;
+	return callError;
 }

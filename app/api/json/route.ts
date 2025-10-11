@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getPrompt, invalidMsg, providers, responseBase } from './jsons';
+import { invalidMsg, responseBase } from './jsons';
 import { verifyResult } from './verifyResult';
 
 export async function GET(req: NextRequest) {

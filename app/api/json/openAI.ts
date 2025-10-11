@@ -1,16 +1,17 @@
 import OpenAI from 'openai';
 import { ChatCompletionMessageParam } from 'openai/resources';
+import { dataType, providerType } from './jsons';
 
-export default async function openaiApi(data: dataType) {
+export default async function openaiApi(data: dataType,provider:providerType): Promise<string>{
 	try {
 		const openai = new OpenAI({
-			baseURL: 'https://openrouter.ai/api/v1',
-			apiKey: process.env.OPEN_ROUTER_API_KEY,
+			baseURL: provider.baseUrl,
+			apiKey: provider.apiKey,
 		});
 		const completion = await openai.chat.completions.create({
-			model: 'openai/gpt-oss-20b:free',
-			  temperature: 0,
-			  top_p: 0.2,
+			model: provider.model,
+			reasoning_effort: "medium",
+
 			...(data as { messages: ChatCompletionMessageParam[] }),
 		});
 
@@ -22,12 +23,5 @@ export default async function openaiApi(data: dataType) {
 		console.log(` - ERROR:\n  - ${error}`); //summary of error
 		return '';
 	}
+	return ''
 }
-type dataType = {
-	messages: {
-		role: string;
-		content: string;
-	}[];
-	top_p?: number; 
-	model?: string;
-};
