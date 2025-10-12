@@ -1,47 +1,38 @@
-@import "tailwindcss";
-
 :root {
-  --background: #121214;
-  --foreground: #eee;
+  --background: #05050d;
+  --foreground: #f7f8ff;
+  --hr: #f7f8ff25;
+  --cards: #0c0b1a;
+  --popover: #0c0b1a;
+  --primary: #8868ff;
+  --tag-background: rgba(136, 104, 255, .1);
+  --tag-border: rgba(136, 104, 255, .3);
+  --secondary: #19182c;
+  --disabled-foreground: #8d8e9b;
+  --destructive: #e7000b;
+  --border: #201f34;
+  --input: #201f34;
+  --purple: #8868ff;
+  --magenta: #a632bf;
+  --green: #00c4a3;
+  --orange: #fe8d00;
+  --red: #de3e2d;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
-
-body,
-html {
-  background: var(--background);
+body {
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  font-weight: bold;
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  
+}
 
-  span.purple {
-    color: #9857f4;
-  }
+*{margin:0;padding: 0;}
 
-  span.green {
-    color: #21d1ea;
-  }
-  span.yellow{
-    color:#e5c430;
-  }
-  div.link{
-    font-weight: normal;
-    color:#888;
-    background: #ffffff0d;
-    padding: 5px;
-    margin: 40px;
-    border-radius: 4px;
-  }
+body,html,#root{
+  height: 100%;
+
 }
